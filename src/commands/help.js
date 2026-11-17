@@ -25,7 +25,8 @@ export default {
             '⏸️ **Duraklat** — duraklatır; ▶️ olunca devam ettirir',
             '⏭️ **Atla** — sıradaki parçaya geçer',
             '❤️ **Beğen** — parçayı beğenilenlere ekler, `/liked` ile kuyruğa alınır',
-            '🎛️ **Kontrol paneli** — çalan parça, ses/tekrar/otomatik durumu ve kuyruk listesi',
+            '🎛️ **Kontrol paneli** — çalan parça, ses/tekrar/otomatik durumu, kuyruk ve kısayol butonları',
+            '-# Panel kısayolları: Tekrar · Karıştır · Oto. çalma · Durdur · Ses −/+ · Kuyruk · Beğeniler · Duraklat',
           ].join('\n'),
         },
         {

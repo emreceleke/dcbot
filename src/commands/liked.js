@@ -1,5 +1,5 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { COLORS, errorEmbed, truncate } from '../music/embeds.js';
+import { COLORS, errorEmbed, likedEmbed } from '../music/embeds.js';
 import { getOrCreatePlayer } from '../music/player.js';
 import { listLikes } from '../music/likes.js';
 
@@ -31,25 +31,7 @@ export default {
     const shouldPlay = interaction.options.getBoolean('cal') ?? false;
 
     if (!shouldPlay) {
-      const shown = likes.slice(0, 20);
-      const list = shown
-        .map((entry, index) => `${index + 1}. [${truncate(entry.title, 60)}](${entry.uri ?? 'https://discord.com'}) — ${truncate(entry.author, 40)}`)
-        .join('\n');
-
-      return interaction.reply({
-        embeds: [
-          {
-            color: COLORS.primary,
-            title: `❤️  Beğendiğin şarkılar (${likes.length})`,
-            description: list,
-            footer:
-              likes.length > shown.length
-                ? { text: `İlk ${shown.length} tanesi gösteriliyor • /liked cal:true ile çal` }
-                : { text: '/liked cal:true ile hepsini kuyruğa al' },
-          },
-        ],
-        ...EPHEMERAL,
-      });
+      return interaction.reply({ embeds: [likedEmbed(likes)], ...EPHEMERAL });
     }
 
     await interaction.deferReply();

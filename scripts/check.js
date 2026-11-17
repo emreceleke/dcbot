@@ -77,7 +77,9 @@ for (const file of files) {
 {
   const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src');
   const cardUrl = pathToFileURL(path.join(srcDir, 'music', 'card.js')).href;
+  const panelUrl = pathToFileURL(path.join(srcDir, 'music', 'panel.js')).href;
   const { buildControlRows } = await import(cardUrl);
+  const { buildPanelRows } = await import(panelUrl);
 
   const basePlayer = {
     queue: {
@@ -86,6 +88,7 @@ for (const file of files) {
       tracks: [{ info: {} }],
     },
     repeatMode: 'off',
+    volume: 80,
   };
 
   let checked = 0;
@@ -94,7 +97,12 @@ for (const file of files) {
   // Butonları gerçekten kurup JSON'unu doğrula; ternary ile seçilen
   // emoji'ler (▶️ / ⏸️) da böylece yakalanır.
   for (const paused of [false, true]) {
-    for (const row of buildControlRows({ ...basePlayer, paused })) {
+    const rows = [
+      ...buildControlRows({ ...basePlayer, paused }),
+      ...buildPanelRows({ ...basePlayer, paused }, 'check-guild'),
+    ];
+
+    for (const row of rows) {
       for (const component of row.toJSON().components ?? []) {
         const emoji = component.emoji?.name;
         if (!emoji) continue;
@@ -106,7 +114,7 @@ for (const file of files) {
 
         if (!/\p{Emoji}/u.test(emoji)) {
           problems.push(
-            `controls.js: "${emoji}" (${component.custom_id}) geçerli bir Discord emojisi değil. ` +
+            `"${emoji}" (${component.custom_id}) geçerli bir Discord emojisi değil. ` +
               `Buton 400 döndürür — gerçek bir Unicode emoji kullan.`,
           );
         }
