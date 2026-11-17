@@ -76,8 +76,8 @@ for (const file of files) {
 // ☰ gibi semboller 400 "Invalid Form Body" döndürür ve komut sessizce patlar.
 {
   const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'src');
-  const controlsUrl = pathToFileURL(path.join(srcDir, 'music', 'controls.js')).href;
-  const { buildControlRows } = await import(controlsUrl);
+  const cardUrl = pathToFileURL(path.join(srcDir, 'music', 'card.js')).href;
+  const { buildControlRows } = await import(cardUrl);
 
   const basePlayer = {
     queue: {

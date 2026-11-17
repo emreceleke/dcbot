@@ -2,10 +2,9 @@ import { SlashCommandBuilder } from 'discord.js';
 import { config, log } from '../config.js';
 import { buildIdentifier, describeResult, isSpotify } from '../music/resolve.js';
 import { getOrCreatePlayer } from '../music/player.js';
-import { COLORS, infoEmbed, nowPlayingCard, truncate } from '../music/embeds.js';
-import { buildControlRows } from '../music/controls.js';
+import { COLORS, truncate } from '../music/embeds.js';
+import { buildControlRows, nowPlayingPayload, textCard } from '../music/card.js';
 import { rememberNowPlaying } from '../music/nowPlaying.js';
-import { isAutoplayEnabled } from '../music/settings.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -72,28 +71,22 @@ export default {
 
     if (wasIdle) await player.play();
 
-    const controls = buildControlRows(player);
-
-    // Çalmaya bu istekle başladıysa zengin "şimdi çalıyor" kartını gönder.
+    // Çalmaya bu istekle başladıysa tam kartı gönder ve onu "canlı" olarak kaydet.
     if (wasIdle) {
-      const card = nowPlayingCard(player, tracks[0], {
-        autoplay: isAutoplayEnabled(interaction.guild.id),
-      });
-
-      const message = await interaction.editReply({ embeds: [card], components: controls });
+      const message = await interaction.editReply(nowPlayingPayload(player, tracks[0]));
       rememberNowPlaying(interaction.guild.id, message.channelId, message.id);
       return;
     }
 
-    // Zaten bir şey çalıyordu: özet ver.
+    // Zaten bir şey çalıyordu: kısa özet + butonlar.
     const summary =
       tracks.length === 1
-        ? `➕ **${truncate(tracks[0].info?.title, 80)}** kuyruğa eklendi.`
+        ? `➕  **${truncate(tracks[0].info?.title, 80)}** kuyruğa eklendi.`
         : info.kind === 'playlist' && info.name
-          ? `➕ **${truncate(info.name, 80)}** (${tracks.length} parça) kuyruğa eklendi.`
-          : `➕ **${tracks.length} parça** kuyruğa eklendi.`;
+          ? `➕  **${truncate(info.name, 80)}** (${tracks.length} parça) kuyruğa eklendi.`
+          : `➕  **${tracks.length} parça** kuyruğa eklendi.`;
 
-    await interaction.editReply({ embeds: [infoEmbed(summary)], components: controls });
+    await interaction.editReply(textCard(summary, { rows: buildControlRows(player) }));
     return;
   },
 };

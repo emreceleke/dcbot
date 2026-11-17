@@ -1,12 +1,10 @@
-import { EmbedBuilder } from 'discord.js';
 import { log } from '../config.js';
-import { buildControlRows } from './controls.js';
-import { COLORS, infoEmbed, nowPlayingCard } from './embeds.js';
-import { isAutoplayEnabled } from './settings.js';
+import { buildControlRows, nowPlayingPayload, textCard } from './card.js';
+import { COLORS } from './embeds.js';
 
 /**
  * Sunucu başına "şimdi çalıyor" mesajının referansı.
- * Amaç: parça değiştiğinde aynı mesajı güncellemek, kuyruğa embed yığmamak.
+ * Amaç: parça değiştiğinde aynı kartı güncellemek, kuyruğa mesaj yığmamak.
  */
 const nowPlayingMessages = new Map();
 let updater = null;
@@ -37,10 +35,7 @@ export async function refreshNowPlaying(client, guildId, player, track) {
       return;
     }
 
-    await message.edit({
-      embeds: [nowPlayingCard(player, track, { autoplay: isAutoplayEnabled(guildId) })],
-      components: buildControlRows(player),
-    });
+    await message.edit(nowPlayingPayload(player, track));
   } catch (error) {
     log.debug('Şimdi çalıyor kartı güncellenemedi:', error?.message ?? error);
     forgetNowPlaying(guildId);
@@ -66,19 +61,9 @@ export function startNowPlayingUpdater(client, intervalMs = 15_000) {
   return updater;
 }
 
-/** Duraklat/devam durumunu buton üzerinden yansıtır. */
+/** Duraklat/devam durumunu buton üzerinden kartta yansıtır. */
 export async function refreshPauseState(interaction, player) {
-  const existing = interaction.message.embeds[0];
-  const card = existing
-    ? EmbedBuilder.from(existing)
-    : nowPlayingCard(player, player.queue.current, {
-        autoplay: isAutoplayEnabled(interaction.guildId),
-      });
-
-  card.setColor(player.paused ? COLORS.warning : COLORS.primary);
-  card.setFooter({ text: player.paused ? 'Duraklatıldı' : 'Çalıyor' });
-
-  await interaction.update({ embeds: [card], components: buildControlRows(player) });
+  await interaction.update(nowPlayingPayload(player, player.queue.current));
 }
 
 /** Kuyruk tükendiğinde kartı "bitti" durumuna getirir. */
@@ -90,16 +75,13 @@ export async function finishNowPlaying(client, guildId, player) {
     const message = await fetchMessage(client, reference);
     if (!message) return;
 
-    await message.edit({
-      embeds: [infoEmbed('⏹️ Kuyruk bitti. Yeni şarkı için `/play` kullan.')],
-      components: buildControlRows(player),
-    });
+    await message.edit(
+      textCard('⏹️  **Kuyruk bitti.** Yeni şarkı için `/play` kullan.', {
+        rows: buildControlRows(player),
+        accent: COLORS.warning,
+      }),
+    );
   } catch (error) {
     log.debug('Bitiş kartı güncellenemedi:', error?.message ?? error);
   }
-}
-
-/** Butonlar hemen yansısın diye kayıtlı kartı yeniler (parça değişmeden). */
-export async function refreshControls(client, guildId, player) {
-  await refreshNowPlaying(client, guildId, player, player?.queue?.current ?? null);
 }

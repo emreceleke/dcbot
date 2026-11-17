@@ -116,51 +116,7 @@ export function requesterMention(track) {
   return id ? `<@${id}>` : 'bilinmiyor';
 }
 
-/**
- * "Şimdi Çalıyor" kartı.
- *
- * Yerleşim:
- *   [author]  Şimdi Çalıyor
- *   [title]   Parça adı            (thumbnail sağda)
- *   Sanatçı
- *   0:43  ▬▬🔘▬▬▬▬▬  4:17
- *   Ekleyen: @kişi
- *   [footer]  Sıradaki: ... | 📋 19 parça
- *
- * Butonlar embed'in içine konulamaz (Discord sınırı); aynı mesaja
- * `components` olarak eklenir ve embed'in hemen altında görünür.
+/*
+ * "Şimdi Çalıyor" kartı artık Components V2 ile `src/music/card.js` içinde
+ * üretiliyor (butonlar konteynerin içinde). Buradaki embed sürümü kaldırıldı.
  */
-export function nowPlayingCard(player, track, { autoplay = false } = {}) {
-  const info = track?.info ?? {};
-  const position = player?.position ?? 0;
-  const duration = info.duration ?? 0;
-  const queueLength = player?.queue?.tracks?.length ?? 0;
-
-  const embed = new EmbedBuilder()
-    .setAuthor({ name: '🎵  Şimdi Çalıyor' })
-    .setTitle(truncate(info.title, 250))
-    .setColor(COLORS.primary)
-    .setDescription(
-      [
-        `**${truncate(trackArtist(track), 60)}**`,
-        '',
-        `\`${formatDuration(position)}\`  ${progressBar(position, duration)}  \`${formatDuration(duration)}\``,
-        '',
-        `Ekleyen: ${requesterMention(track)}`,
-      ].join('\n'),
-    );
-
-  if (info.uri) embed.setURL(info.uri);
-
-  const artwork = trackArtwork(track);
-  if (artwork) embed.setThumbnail(artwork);
-
-  const next = player?.queue?.tracks?.[0];
-  embed.setFooter({
-    text: next
-      ? `Sıradaki: ${truncate(next.info?.title, 70)} | 📋 ${queueLength} parça`
-      : 'Kuyrukta bekleyen parça yok.',
-  });
-
-  return embed;
-}

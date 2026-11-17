@@ -60,7 +60,7 @@ async function main() {
   const { errorEmbed } = await import('./music/embeds.js');
   const { continueWithRecommendations } = await import('./recommend/engine.js');
   const { handleMusicButton } = await import('./music/buttons.js');
-  const { isMusicButton } = await import('./music/controls.js');
+  const { isMusicButton } = await import('./music/card.js');
   const {
     finishNowPlaying,
     forgetNowPlaying,

@@ -1,7 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import { log } from '../config.js';
-import { COLORS, errorEmbed, formatDuration, truncate, nowPlayingCard } from './embeds.js';
-import { buildControlRows } from './controls.js';
+import { COLORS, errorEmbed, formatDuration, truncate } from './embeds.js';
+import { nowPlayingPayload } from './card.js';
 import { refreshPauseState } from './nowPlaying.js';
 import { canControl } from './player.js';
 import { isAutoplayEnabled } from './settings.js';
@@ -62,18 +62,6 @@ export async function handleMusicButton(interaction, client) {
   }
 }
 
-/** Kartı, basılan mesajda tazeler (parça değişmeden). */
-async function updatePressedCard(interaction, player) {
-  await interaction.update({
-    embeds: [
-      nowPlayingCard(player, player.queue.current, {
-        autoplay: isAutoplayEnabled(interaction.guildId),
-      }),
-    ],
-    components: buildControlRows(player),
-  });
-}
-
 async function handleSkip(interaction, player) {
   await interaction.deferUpdate();
 
@@ -103,7 +91,9 @@ async function handlePrevious(interaction, player) {
 async function handleLoop(interaction, player) {
   const next = LOOP_CYCLE[player.repeatMode ?? 'off'] ?? 'queue';
   await player.setRepeatMode(next);
-  return updatePressedCard(interaction, player);
+
+  // Kart zaten tekrar modunu buton renginde ve panelde gösteriyor.
+  await interaction.update(nowPlayingPayload(player, player.queue.current));
 }
 
 async function handleLike(interaction, player, track) {
@@ -120,9 +110,6 @@ async function handleLike(interaction, player, track) {
     ],
     ...EPHEMERAL,
   });
-
-  // Butonları tazele (duruma göre).
-  interaction.message?.edit({ components: buildControlRows(player) }).catch(() => {});
 }
 
 async function handleSimilar(interaction, player, current) {
@@ -139,16 +126,9 @@ async function handleSimilar(interaction, player, current) {
   await player.queue.add(tracks);
   if (!player.playing && !player.paused) await player.play();
 
-  // Sıradaki parça bilgisi ve butonlar hemen yansısın.
+  // Kartın footer'ı ve kuyruk sayısı hemen yansısın.
   interaction.message
-    ?.edit({
-      embeds: [
-        nowPlayingCard(player, player.queue.current, {
-          autoplay: isAutoplayEnabled(interaction.guildId),
-        }),
-      ],
-      components: buildControlRows(player),
-    })
+    ?.edit(nowPlayingPayload(player, player.queue.current))
     .catch(() => {});
 
   const list = tracks

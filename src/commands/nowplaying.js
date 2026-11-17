@@ -1,15 +1,14 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { COLORS, errorEmbed, nowPlayingCard } from '../music/embeds.js';
-import { buildControlRows } from '../music/controls.js';
+import { errorEmbed } from '../music/embeds.js';
+import { nowPlayingPayload } from '../music/card.js';
 import { rememberNowPlaying } from '../music/nowPlaying.js';
-import { isAutoplayEnabled } from '../music/settings.js';
 
 const EPHEMERAL = { flags: MessageFlags.Ephemeral };
 
 export default {
   data: new SlashCommandBuilder()
     .setName('nowplaying')
-    .setDescription('Çalan parçanın detaylarını gösterir'),
+    .setDescription('Çalan parçanın kartını gösterir'),
 
   async execute(interaction, client) {
     const player = client.lavalink.getPlayer(interaction.guild.id);
@@ -19,12 +18,7 @@ export default {
       return interaction.reply({ embeds: [errorEmbed('Şu an çalan bir parça yok.')], ...EPHEMERAL });
     }
 
-    const message = await interaction.reply({
-      embeds: [
-        nowPlayingCard(player, track, { autoplay: isAutoplayEnabled(interaction.guild.id) }),
-      ],
-      components: buildControlRows(player),
-    });
+    const message = await interaction.reply(nowPlayingPayload(player, track));
 
     // Bu mesajı "canlı kart" yap: parça değişince burası güncellenir.
     rememberNowPlaying(interaction.guild.id, message.channelId, message.id);
