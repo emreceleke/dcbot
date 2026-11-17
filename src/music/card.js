@@ -108,20 +108,24 @@ export function nowPlayingComponents(player, track) {
   const paused = Boolean(player?.paused);
   const artwork = trackArtwork(track);
 
-  const section = new SectionBuilder().addTextDisplayComponents(
-    text(`## ${truncate(info.title, 200)}\n${truncate(trackArtist(track), 60)}`),
-  );
-
-  if (artwork) {
-    section.setThumbnailAccessory(
-      new ThumbnailBuilder().setURL(artwork).setDescription('Albüm kapağı'),
-    );
-  }
+  const heading = text(`## ${truncate(info.title, 200)}\n${truncate(trackArtist(track), 60)}`);
 
   const container = new ContainerBuilder()
     .setAccentColor(paused ? COLORS.warning : COLORS.primary)
-    .addTextDisplayComponents(text(paused ? '-# ⏸️  Duraklatıldı' : '-# 🎵  Şimdi Çalıyor'))
-    .addSectionComponents(section)
+    .addTextDisplayComponents(text(paused ? '-# ⏸️  Duraklatıldı' : '-# 🎵  Şimdi Çalıyor'));
+
+  // Section'ın accessory'si zorunlu; kapak yoksa düz metin olarak ekle.
+  if (artwork) {
+    container.addSectionComponents(
+      new SectionBuilder()
+        .addTextDisplayComponents(heading)
+        .setThumbnailAccessory(new ThumbnailBuilder().setURL(artwork).setDescription('Albüm kapağı')),
+    );
+  } else {
+    container.addTextDisplayComponents(heading);
+  }
+
+  container
     .addSeparatorComponents(divider())
     .addTextDisplayComponents(
       text(
@@ -134,7 +138,7 @@ export function nowPlayingComponents(player, track) {
     .addTextDisplayComponents(
       text(
         next
-          ? `-# Sıradaki: ${truncate(next.info?.title, 70)} | 📋 ${queueLength} parça | Ekleyen: ${requesterMention(track)}`
+          ? `-# Sıradaki: ${truncate(next.info?.title, 40)} | 📋 ${queueLength} parça | Ekleyen: ${requesterMention(track)}`
           : `-# Kuyrukta bekleyen parça yok. | Ekleyen: ${requesterMention(track)}`,
       ),
     );
