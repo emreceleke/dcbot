@@ -26,7 +26,7 @@ export default {
             '⏭️ **Atla** — sıradaki parçaya geçer',
             '❤️ **Beğen** — parçayı beğenilenlere ekler, `/liked` ile kuyruğa alınır',
             '🎛️ **Kontrol paneli** — çalan parça, ses/tekrar/otomatik durumu, kuyruk ve kısayol butonları',
-            '-# Panel kısayolları: Tekrar · Karıştır · Oto. çalma · Durdur · Ses −/+ · Kuyruk · Beğeniler',
+            '-# Panel kısayolları: Tekrar · Karıştır · Oto. çalma · Durdur · Ses −/+ · Kuyruk · Beğeniler · Geçmiş',
             '-# `/liked` listesindeki menüden bir şarkıyı beğenilerden kaldırabilirsin.',
           ].join('\n'),
         },

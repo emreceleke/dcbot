@@ -61,6 +61,7 @@ async function main() {
   const { continueWithRecommendations } = await import('./recommend/engine.js');
   const { handleMusicButton } = await import('./music/buttons.js');
   const { handleLikedSelect, LIKED_SELECT_ID } = await import('./music/likedView.js');
+  const { recordPlay } = await import('./music/history.js');
   const { isMusicButton } = await import('./music/card.js');
   const {
     finishNowPlaying,
@@ -102,6 +103,7 @@ async function main() {
 
   client.lavalink.on('trackStart', (player, track) => {
     rememberTrack(player.guildId, track);
+    recordPlay(player.guildId, track).catch(() => {});
     // Aynı "şu an çalıyor" mesajını güncelle; kuyruğa embed yığma.
     refreshNowPlaying(client, player.guildId, player, track).catch(() => {});
   });

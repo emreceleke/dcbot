@@ -71,6 +71,7 @@ export function buildPanelRows(player, guildId) {
       button('volUp', '🔊', 'Ses +', { disabled: volume >= 150 }),
       button('queue', '📋', 'Kuyruk'),
       button('liked', '❤️', 'Beğeniler'),
+      button('history', '🕘', 'Geçmiş'),
     ),
   ];
 }

@@ -98,6 +98,39 @@ export function queueEmbed(player, page = 0, pageSize = 10) {
   return embed;
 }
 
+/**
+ * Çalma geçmişi (son 100 parça).
+ *
+ * Tek embed'e sığsın diye 15 satırlık alanlara bölünüyor:
+ * 100 satır × ~55 karakter = embed'in 6000 karakter sınırının altında.
+ */
+const HISTORY_PER_FIELD = 15;
+
+export function historyEmbed(entries) {
+  const embed = new EmbedBuilder()
+    .setColor(COLORS.primary)
+    .setTitle(`🕘  Son çalınanlar (${entries.length})`)
+    .setFooter({ text: `${entries.length} kayıt • en yeni üstte` });
+
+  for (let index = 0; index < entries.length; index += HISTORY_PER_FIELD) {
+    const chunk = entries.slice(index, index + HISTORY_PER_FIELD);
+    const start = index + 1;
+    const end = index + chunk.length;
+
+    embed.addFields({
+      name: `${start} – ${end}`,
+      value: chunk
+        .map(
+          (entry, offset) =>
+            `${start + offset}. ${truncate(entry.title, 30)} — ${truncate(entry.author, 15)}`,
+        )
+        .join('\n'),
+    });
+  }
+
+  return embed;
+}
+
 // ─── "Şimdi Çalıyor" kartı ──────────────────────────────────────────────────
 
 /** İlerleme çubuğu: dolu ▬ + konum işareti 🔘 + boş ▬ */

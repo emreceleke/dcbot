@@ -1,9 +1,10 @@
 import { MessageFlags } from 'discord.js';
 import { log } from '../config.js';
-import { COLORS, errorEmbed, queueEmbed, truncate } from './embeds.js';
+import { COLORS, errorEmbed, historyEmbed, queueEmbed, truncate } from './embeds.js';
 import { nowPlayingPayload, textCard } from './card.js';
 import { buildPanelPayload, loopLabel, nextLoopMode } from './panel.js';
 import { likedPayload } from './likedView.js';
+import { getHistory } from './history.js';
 import { refreshPauseState } from './nowPlaying.js';
 import { canControl } from './player.js';
 import { isAutoplayEnabled, setAutoplay } from './settings.js';
@@ -232,6 +233,17 @@ async function handlePanelShortcut(interaction, client, player, action) {
         });
       }
       return interaction.reply(likedPayload(likes));
+    }
+
+    case 'history': {
+      const entries = await getHistory(guildId);
+      if (!entries.length) {
+        return interaction.reply({
+          embeds: [errorEmbed('Henüz çalınan bir parça yok.')],
+          ...EPHEMERAL,
+        });
+      }
+      return interaction.reply({ embeds: [historyEmbed(entries)], ...EPHEMERAL });
     }
 
     case 'stop': {
