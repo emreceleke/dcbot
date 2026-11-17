@@ -75,3 +75,15 @@ export async function listLikes(userId) {
   const data = await load();
   return data[userId] ?? [];
 }
+
+/** Beğenilenlerden tek kayıt çıkarır. */
+export async function removeLike(userId, key) {
+  const data = await load();
+  const list = data[userId] ?? [];
+  const index = list.findIndex((entry) => entry.key === key);
+  if (index === -1) return { removed: false, entry: null, count: list.length };
+
+  const [entry] = list.splice(index, 1);
+  await persist();
+  return { removed: true, entry, count: list.length };
+}

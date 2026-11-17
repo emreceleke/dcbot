@@ -1,14 +1,15 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
-import { COLORS, errorEmbed, likedEmbed } from '../music/embeds.js';
+import { COLORS, errorEmbed } from '../music/embeds.js';
 import { getOrCreatePlayer } from '../music/player.js';
 import { listLikes } from '../music/likes.js';
+import { likedPayload } from '../music/likedView.js';
 
 const EPHEMERAL = { flags: MessageFlags.Ephemeral };
 
 export default {
   data: new SlashCommandBuilder()
     .setName('liked')
-    .setDescription('Beğendiğin şarkıları gösterir veya kuyruğa alır')
+    .setDescription('Beğendiğin şarkıları gösterir, kaldırmana izin verir veya kuyruğa alır')
     .addBooleanOption((option) =>
       option
         .setName('cal')
@@ -18,6 +19,12 @@ export default {
 
   async execute(interaction, client) {
     const likes = await listLikes(interaction.user.id);
+    const shouldPlay = interaction.options.getBoolean('cal') ?? false;
+
+    // Çalmayacaksa listeyi seçim menüsüyle göster: menüden seçilen kayıt silinir.
+    if (!shouldPlay) {
+      return interaction.reply({ ...likedPayload(likes), ...EPHEMERAL });
+    }
 
     if (!likes.length) {
       return interaction.reply({
@@ -26,12 +33,6 @@ export default {
         ],
         ...EPHEMERAL,
       });
-    }
-
-    const shouldPlay = interaction.options.getBoolean('cal') ?? false;
-
-    if (!shouldPlay) {
-      return interaction.reply({ embeds: [likedEmbed(likes)], ...EPHEMERAL });
     }
 
     await interaction.deferReply();

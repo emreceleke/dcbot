@@ -60,6 +60,7 @@ async function main() {
   const { errorEmbed } = await import('./music/embeds.js');
   const { continueWithRecommendations } = await import('./recommend/engine.js');
   const { handleMusicButton } = await import('./music/buttons.js');
+  const { handleLikedSelect, LIKED_SELECT_ID } = await import('./music/likedView.js');
   const { isMusicButton } = await import('./music/card.js');
   const {
     finishNowPlaying,
@@ -132,6 +133,16 @@ async function main() {
           await handleMusicButton(interaction, client);
         } catch (error) {
           log.error('Buton işlenemedi:', error);
+        }
+        return;
+      }
+
+      // Beğenilenler listesindeki "kaldır" menüsü.
+      if (interaction.isStringSelectMenu() && interaction.customId === LIKED_SELECT_ID) {
+        try {
+          await handleLikedSelect(interaction);
+        } catch (error) {
+          log.error('Beğeni menüsü işlenemedi:', error);
         }
       }
       return;

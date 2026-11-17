@@ -1,9 +1,10 @@
 import { MessageFlags } from 'discord.js';
 import { log } from '../config.js';
-import { COLORS, errorEmbed, likedEmbed, queueEmbed, truncate } from './embeds.js';
+import { COLORS, errorEmbed, queueEmbed, truncate } from './embeds.js';
 import { nowPlayingPayload, textCard } from './card.js';
 import { buildPanelPayload, loopLabel, nextLoopMode } from './panel.js';
-import { refreshNowPlaying, refreshPauseState } from './nowPlaying.js';
+import { likedPayload } from './likedView.js';
+import { refreshPauseState } from './nowPlaying.js';
 import { canControl } from './player.js';
 import { isAutoplayEnabled, setAutoplay } from './settings.js';
 import { listLikes, toggleLike } from './likes.js';
@@ -219,18 +220,6 @@ async function handlePanelShortcut(interaction, client, player, action) {
       break;
     }
 
-    case 'pause':
-      if (!player.paused) await player.pause();
-      status = '⏸️ Duraklatıldı.';
-      refreshNowPlaying(client, guildId, player, player.queue.current).catch(() => {});
-      break;
-
-    case 'resume':
-      if (player.paused) await player.resume();
-      status = '▶️ Devam ediyor.';
-      refreshNowPlaying(client, guildId, player, player.queue.current).catch(() => {});
-      break;
-
     case 'queue':
       return interaction.reply({ embeds: [queueEmbed(player, 0)], ...EPHEMERAL });
 
@@ -242,7 +231,7 @@ async function handlePanelShortcut(interaction, client, player, action) {
           ...EPHEMERAL,
         });
       }
-      return interaction.reply({ embeds: [likedEmbed(likes)], ...EPHEMERAL });
+      return interaction.reply(likedPayload(likes));
     }
 
     case 'stop': {

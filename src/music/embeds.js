@@ -69,28 +69,6 @@ export function infoEmbed(message) {
   return new EmbedBuilder().setColor(COLORS.primary).setDescription(message);
 }
 
-/** Beğenilen şarkı listesi (hem `/liked` hem panel kısayolu kullanıyor). */
-export function likedEmbed(likes, shown = 20) {
-  const slice = likes.slice(0, shown);
-  const list = slice
-    .map(
-      (entry, index) =>
-        `${index + 1}. [${truncate(entry.title, 60)}](${entry.uri ?? 'https://discord.com'}) — ${truncate(entry.author, 40)}`,
-    )
-    .join('\n');
-
-  return new EmbedBuilder()
-    .setColor(COLORS.primary)
-    .setTitle(`❤️  Beğendiğin şarkılar (${likes.length})`)
-    .setDescription(list)
-    .setFooter({
-      text:
-        likes.length > slice.length
-          ? `İlk ${slice.length} tanesi gösteriliyor • /liked cal:true ile çal`
-          : '/liked cal:true ile hepsini kuyruğa al',
-    });
-}
-
 /** Kuyruğu tek bir embed'e sığdırır. */
 export function queueEmbed(player, page = 0, pageSize = 10) {
   const tracks = player.queue.tracks ?? [];

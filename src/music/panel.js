@@ -51,7 +51,6 @@ const button = (action, emoji, label, { style = ButtonStyle.Secondary, disabled 
 
 /** Panelin buton satırları. `check.js` emoji doğrulaması için de kullanıyor. */
 export function buildPanelRows(player, guildId) {
-  const paused = Boolean(player?.paused);
   const loopOn = (player?.repeatMode ?? 'off') !== 'off';
   const autoplayOn = isAutoplayEnabled(guildId);
   const volume = player?.volume ?? 100;
@@ -72,7 +71,6 @@ export function buildPanelRows(player, guildId) {
       button('volUp', '🔊', 'Ses +', { disabled: volume >= 150 }),
       button('queue', '📋', 'Kuyruk'),
       button('liked', '❤️', 'Beğeniler'),
-      button(paused ? 'resume' : 'pause', paused ? '▶️' : '⏸️', paused ? 'Devam' : 'Duraklat'),
     ),
   ];
 }
