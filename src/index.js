@@ -62,6 +62,7 @@ async function main() {
   const { handleMusicButton } = await import('./music/buttons.js');
   const { handleLikedSelect, LIKED_SELECT_ID } = await import('./music/likedView.js');
   const { recordPlay } = await import('./music/history.js');
+  const { attachAutoLeave, cancelAutoLeave, refreshAutoLeave } = await import('./music/autoLeave.js');
   const { isMusicButton } = await import('./music/card.js');
   const {
     finishNowPlaying,
@@ -104,6 +105,8 @@ async function main() {
   client.lavalink.on('trackStart', (player, track) => {
     rememberTrack(player.guildId, track);
     recordPlay(player.guildId, track).catch(() => {});
+    // Kanal boşsa (ör. istek sahibi hemen çıktıysa) sayacı burada da başlat.
+    refreshAutoLeave(client, player);
     // Aynı "şu an çalıyor" mesajını güncelle; kuyruğa embed yığma.
     refreshNowPlaying(client, player.guildId, player, track).catch(() => {});
   });
@@ -122,9 +125,13 @@ async function main() {
   });
 
   client.lavalink.on('playerDestroy', (player) => {
+    cancelAutoLeave(player.guildId);
     forgetGuild(player.guildId);
     forgetNowPlaying(player.guildId);
   });
+
+  // Kanal boş kalırsa 10 dk sonra ayrıl.
+  attachAutoLeave(client);
 
   // ─── Etkileşimler ─────────────────────────────────────────────────────────
   client.on('interactionCreate', async (interaction) => {
