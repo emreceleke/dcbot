@@ -66,8 +66,13 @@ export async function refreshPauseState(interaction, player) {
   await interaction.update(nowPlayingPayload(player, player.queue.current));
 }
 
-/** Kuyruk tükendiğinde kartı "bitti" durumuna getirir. */
-export async function finishNowPlaying(client, guildId, player) {
+/** Kartı "bitti" / "durduruldu" durumuna getirir. */
+export async function finishNowPlaying(
+  client,
+  guildId,
+  player,
+  content = '⏹️  **Kuyruk bitti.** Yeni şarkı için `/play` kullan.',
+) {
   const reference = nowPlayingMessages.get(guildId);
   if (!reference) return;
 
@@ -76,8 +81,13 @@ export async function finishNowPlaying(client, guildId, player) {
     if (!message) return;
 
     await message.edit(
-      textCard('⏹️  **Kuyruk bitti.** Yeni şarkı için `/play` kullan.', {
-        rows: buildControlRows(player),
+      textCard(content, {
+        // Kart artık "bitti": kontrol butonları pasif görünsün.
+        rows: buildControlRows({
+          paused: false,
+          repeatMode: 'off',
+          queue: { current: null, previous: [], tracks: [] },
+        }),
         accent: COLORS.warning,
       }),
     );

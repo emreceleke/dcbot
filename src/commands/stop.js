@@ -1,6 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { COLORS, errorEmbed } from '../music/embeds.js';
 import { canControl } from '../music/player.js';
+import { finishNowPlaying } from '../music/nowPlaying.js';
 
 const EPHEMERAL = { flags: MessageFlags.Ephemeral };
 
@@ -24,6 +25,14 @@ export default {
     }
 
     await interaction.deferReply();
+
+    // Sahnede kalan kartı "durduruldu" durumuna çek, sonra oynatıcıyı kaldır.
+    await finishNowPlaying(
+      client,
+      interaction.guild.id,
+      player,
+      '⏹️  **Durduruldu.** Yeni şarkı için `/play` kullan.',
+    );
 
     // stopPlaying(clearQueue, executeAutoplay) -> kuyruğu boşaltır, autoplay tetiklemez.
     await player.stopPlaying(true, false);

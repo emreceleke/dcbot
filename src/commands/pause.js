@@ -1,5 +1,6 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { COLORS, errorEmbed } from '../music/embeds.js';
+import { refreshNowPlaying } from '../music/nowPlaying.js';
 
 const EPHEMERAL = { flags: MessageFlags.Ephemeral };
 
@@ -17,12 +18,14 @@ export default {
 
     if (player.paused) {
       await player.resume();
+      refreshNowPlaying(client, interaction.guild.id, player, player.queue.current).catch(() => {});
       return interaction.reply({
         embeds: [{ color: COLORS.success, description: '▶️ Devam ediliyor.' }],
       });
     }
 
     await player.pause();
+    refreshNowPlaying(client, interaction.guild.id, player, player.queue.current).catch(() => {});
     return interaction.reply({
       embeds: [{ color: COLORS.warning, description: '⏸️ Duraklatıldı.' }],
     });
