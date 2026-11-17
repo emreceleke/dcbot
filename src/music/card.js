@@ -138,7 +138,7 @@ export function nowPlayingComponents(player, track) {
     .addTextDisplayComponents(
       text(
         next
-          ? `-# Sıradaki: ${truncate(next.info?.title, 40)} | 📋 ${queueLength} parça | Ekleyen: ${requesterMention(track)}`
+          ? `-# Sıradaki: ${truncate(next.info?.title, 30)} | 📋 ${queueLength} parça | Ekleyen: ${requesterMention(track)}`
           : `-# Kuyrukta bekleyen parça yok. | Ekleyen: ${requesterMention(track)}`,
       ),
     );
