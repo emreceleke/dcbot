@@ -19,6 +19,18 @@ export default {
       description: lines,
       fields: [
         {
+          name: 'Butonlar (şimdi çalıyor kartındaki)',
+          value: [
+            '⏮️ **Önceki** — bir önceki parçaya döner (geçmiş yoksa pasif)',
+            '⏸️ **Duraklat** — duraklatır; ▶️ olunca devam ettirir',
+            '⏭️ **Atla** — sıradaki parçaya geçer',
+            '🔁 **Tekrar** — Kapalı → Kuyruk → Tek parça (yeşil = açık)',
+            '❤️ **Beğen** — parçayı beğenilenlere ekler, `/liked` ile kuyruğa alınır',
+            '✨ **Benzer** — bu parçaya benzeyen 8 şarkıyı kuyruğa ekler',
+            '🎛️ **Kontrol paneli** — çalan parça, ses/tekrar/otomatik durumu ve kuyruk listesi',
+          ].join('\n'),
+        },
+        {
           name: 'Kaynaklar',
           value: 'YouTube (arama/link/playlist) • SoundCloud • doğrudan ses linki',
         },
