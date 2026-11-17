@@ -116,32 +116,25 @@ export function requesterMention(track) {
   return id ? `<@${id}>` : 'bilinmiyor';
 }
 
-const LOOP_LABELS = { off: 'Kapalı', queue: 'Kuyruk', track: 'Tek parça' };
-
 /**
- * Referans tasarımdaki zengin "şimdi çalıyor" kartını üretir.
+ * "Şimdi Çalıyor" kartı.
  *
  * Yerleşim:
  *   [author]  Şimdi Çalıyor
  *   [title]   Parça adı            (thumbnail sağda)
  *   Sanatçı
- *   0:01  ▬▬🔘▬▬▬▬▬  2:46
+ *   0:43  ▬▬🔘▬▬▬▬▬  4:17
  *   Ekleyen: @kişi
- *   🔊 %80 • 🔁 Kapalı • ♾️ Otomatik • ☰ 3 parça
- *   [footer]  Sıradaki: ...
+ *   [footer]  Sıradaki: ... | 📋 19 parça
+ *
+ * Butonlar embed'in içine konulamaz (Discord sınırı); aynı mesaja
+ * `components` olarak eklenir ve embed'in hemen altında görünür.
  */
 export function nowPlayingCard(player, track, { autoplay = false } = {}) {
   const info = track?.info ?? {};
   const position = player?.position ?? 0;
   const duration = info.duration ?? 0;
   const queueLength = player?.queue?.tracks?.length ?? 0;
-
-  const statusLine = [
-    `🔊 %${player?.volume ?? 100}`,
-    `🔁 ${LOOP_LABELS[player?.repeatMode ?? 'off'] ?? 'Kapalı'}`,
-    `♾️ Otomatik ${autoplay ? 'açık' : 'kapalı'}`,
-    `📋 ${queueLength} parça`,
-  ].join('  •  ');
 
   const embed = new EmbedBuilder()
     .setAuthor({ name: '🎵  Şimdi Çalıyor' })
@@ -154,7 +147,6 @@ export function nowPlayingCard(player, track, { autoplay = false } = {}) {
         `\`${formatDuration(position)}\`  ${progressBar(position, duration)}  \`${formatDuration(duration)}\``,
         '',
         `Ekleyen: ${requesterMention(track)}`,
-        statusLine,
       ].join('\n'),
     );
 
@@ -166,7 +158,7 @@ export function nowPlayingCard(player, track, { autoplay = false } = {}) {
   const next = player?.queue?.tracks?.[0];
   embed.setFooter({
     text: next
-      ? `Sıradaki: ${truncate(next.info?.title, 70)}`
+      ? `Sıradaki: ${truncate(next.info?.title, 70)} | 📋 ${queueLength} parça`
       : 'Kuyrukta bekleyen parça yok.',
   });
 

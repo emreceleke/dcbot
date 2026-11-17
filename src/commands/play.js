@@ -80,15 +80,6 @@ export default {
         autoplay: isAutoplayEnabled(interaction.guild.id),
       });
 
-      if (tracks.length > 1) {
-        card.setFooter({
-          text:
-            info.kind === 'playlist' && info.name
-              ? `${truncate(info.name, 50)} • +${tracks.length - 1} parça`
-              : `+${tracks.length - 1} parça kuyruğa eklendi`,
-        });
-      }
-
       const message = await interaction.editReply({ embeds: [card], components: controls });
       rememberNowPlaying(interaction.guild.id, message.channelId, message.id);
       return;
@@ -98,7 +89,9 @@ export default {
     const summary =
       tracks.length === 1
         ? `➕ **${truncate(tracks[0].info?.title, 80)}** kuyruğa eklendi.`
-        : `➕ **${tracks.length} parça** kuyruğa eklendi.`;
+        : info.kind === 'playlist' && info.name
+          ? `➕ **${truncate(info.name, 80)}** (${tracks.length} parça) kuyruğa eklendi.`
+          : `➕ **${tracks.length} parça** kuyruğa eklendi.`;
 
     await interaction.editReply({ embeds: [infoEmbed(summary)], components: controls });
     return;
