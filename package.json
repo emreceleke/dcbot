@@ -1,0 +1,21 @@
+{
+  "name": "dc-music-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Discord müzik botu - YouTube + SoundCloud (Lavalink v4)",
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "doctor": "node scripts/doctor.js",
+    "check": "node scripts/check.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.28.1",
+    "lavalink-client": "^2.11.2",
+    "ws": "^8.18.0"
+  }
+}

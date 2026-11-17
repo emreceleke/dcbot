@@ -1,0 +1,10 @@
+node_modules
+.git
+.gitignore
+.env
+.env.example
+logs
+lavalink/logs
+data
+*.md
+!README.md

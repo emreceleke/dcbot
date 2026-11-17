@@ -1,0 +1,116 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Lavalink v4 + youtube-source plugin
+#  Bu dosya botun müzik motorunu tanımlar. Sesin tamamı burada işlenir.
+# ─────────────────────────────────────────────────────────────────────────────
+
+server:
+  port: 2333
+  address: 0.0.0.0
+
+# ─── youtube-source plugin ayarları ──────────────────────────────────────────
+# Kaynak: https://github.com/lavalink-devs/youtube-source
+plugins:
+  youtube:
+    enabled: true
+    # "ytsearch:" ve "ytmsearch:" (YouTube Music) aramalarına izin ver.
+    allowSearch: true
+    # Video ve playlist ID'lerinin doğrudan girilmesine izin ver.
+    allowDirectVideoIds: true
+    allowDirectPlaylistIds: true
+
+    # Sıra önemli: ilk uyan client kullanılır.
+    #   MUSIC      -> sadece arama (ytmsearch için en isabetli), playback yok
+    #   ANDROID_VR -> playback + opus  (bot korumasına karşı en dayanıklı)
+    #   WEB        -> playback + opus
+    #   MWEB       -> playback + opus (yedek)
+    clients:
+      - MUSIC
+      - ANDROID_VR
+      - WEB
+      - MWEB
+
+    # ─── Opsiyonel: YouTube "bot değilim" duvarına takılırsan ───────────────
+    # 1) poToken yöntemi (WEB/WEBEMBEDDED client'ları için geçerli)
+    #    python3 -m pip install bgutil-ytdlp-pot-provider  # veya
+    #    docker run -d -p 4416:4416 brainicism/bgutil-ytdlp-pot-provider
+    #    Üretilen token'ı aşağıya yapıştır:
+    #
+    # pot:
+    #   token: "BURAYA_PO_TOKEN"
+    #   visitorData: "BURAYA_VISITOR_DATA"
+    #
+    # 2) OAuth yöntemi (poToken ile birlikte KULLANILMAZ; atık/burner hesap kullan!)
+    #
+    # oauth:
+    #   enabled: true
+    #   # refreshToken: "BURAYA_REFRESH_TOKEN"
+    #
+    # 3) İmza çözme (cipher) sorunlarında uzak çözücü:
+    #
+    # remoteCipher:
+    #   url: "http://127.0.0.1:8001"
+    #   password: "degistir"
+
+lavalink:
+  plugins:
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.18.2"
+      snapshot: false
+
+  server:
+    password: "youshallnotpass"
+    sources:
+      # Yerleşik YouTube kaynağı KAPATILMALI, aksi halde plugin ile çakışır.
+      youtube: false
+      bandcamp: true
+      soundcloud: true
+      twitch: true
+      vimeo: true
+      # Doğrudan ses/m3u8 linkleri (ör. podcast, radyo, kendi CDN'in).
+      http: true
+      local: false
+
+    # Kaynakları ihtiyaca göre kapatarak JVM yükünü azaltabilirsin.
+    filters:
+      volume: true
+      equalizer: true
+      karaoke: false
+      timescale: false
+      tremolo: false
+      vibrato: false
+      distortion: false
+      rotation: false
+      channelMix: false
+      lowPass: false
+
+    bufferDurationMs: 400
+    frameBufferDurationMs: 5000
+    opusEncodingQuality: 10
+    resamplingQuality: HIGH
+    trackStuckThresholdMs: 10000
+    useSeekGhosting: true
+
+    # Playlist başına en fazla kaç video yükleneceği (LavalinkPlaylistLoadLimit).
+    # NOT: youtube-source bunları otomatik olarak devralır.
+    youtubePlaylistLoadLimit: 50
+
+    playerUpdateInterval: 5
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+
+logging:
+  file:
+    path: ./logs/
+  level:
+    root: INFO
+    lavalink: INFO
+  # YouTube hata ayıklamasında işine yarar:
+  # logback:
+  #   rollingpolicy:
+  #     max-history: 7
+  #   level:
+  #     dev.lavalink.youtube: DEBUG

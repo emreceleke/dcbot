@@ -1,0 +1,10 @@
+# Depoda her zaman LF olsun: bot Linux konteynerinde çalışıyor.
+# Windows'ta checkout ederken CRLF'e çevrilse bile depoya LF gider.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.zip binary
