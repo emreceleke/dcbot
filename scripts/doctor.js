@@ -244,6 +244,19 @@ if (tcpReachable) {
       ok(`Lavalink sürümü: ${version || '(boş yanıt)'}`);
     } else if (res.status === 401 || res.status === 403) {
       bad(`Kimlik doğrulama başarısız (HTTP ${res.status}). LAVALINK_PASSWORD yanlış.`);
+    } else if (res.status === 404) {
+      // Bazı Lavalink sürümleri /version'ı yayınlamıyor; /v4/info ile doğrula.
+      const infoRes = await lavalinkGet('/v4/info');
+      if (infoRes.ok) {
+        const info = await infoRes.json();
+        warn(
+          `/version yok (HTTP 404), düğüm yine de çalışıyor: Lavalink ${info.version?.semver ?? '?'}, ` +
+            `LavaPlayer ${info.lavaplayer ?? '?'}`,
+        );
+        ok(`Kaynaklar: ${(info.sourceManagers ?? []).slice(0, 6).join(', ')}${(info.sourceManagers?.length ?? 0) > 6 ? '...' : ''}`);
+      } else {
+        bad(`/version ve /v4/info yanıt vermedi (HTTP ${infoRes.status}).`);
+      }
     } else {
       bad(`/version beklenmedik yanıt: HTTP ${res.status}`);
     }

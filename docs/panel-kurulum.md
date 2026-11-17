@@ -70,11 +70,11 @@ DISCORD_TOKEN=buraya_bot_token
 CLIENT_ID=buraya_application_id
 DEV_GUILD_ID=test_sunucu_id
 
-LAVALINK_HOST=lavalinkv4.serenetia.com
-LAVALINK_PORT=443
-LAVALINK_PASSWORD=https://seretia.link/discord
-LAVALINK_SECURE=true
-LAVALINK_NAME=public
+LAVALINK_HOST=lavalink.jirayu.net
+LAVALINK_PORT=13592
+LAVALINK_PASSWORD=youshallnotpass
+LAVALINK_SECURE=false
+LAVALINK_NAME=jirayu
 
 SEARCH_PLATFORM=ytmsearch
 AUTOPLAY=true

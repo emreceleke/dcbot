@@ -80,10 +80,10 @@ Bunlar **haftalık renew** ister. Panelde takvim hatırlatıcısı kur.
 3. Env değişkenleri:
    ```
    DISCORD_TOKEN · CLIENT_ID · DEV_GUILD_ID
-   LAVALINK_HOST=lavalinkv4.serenetia.com
-   LAVALINK_PORT=443
-   LAVALINK_PASSWORD=https://seretia.link/discord
-   LAVALINK_SECURE=true
+   LAVALINK_HOST=lavalink.jirayu.net
+   LAVALINK_PORT=13592
+   LAVALINK_PASSWORD=youshallnotpass
+   LAVALINK_SECURE=false
    SEARCH_PLATFORM=ytmsearch
    ```
 4. Başlatma komutu: `node index.js` (veya `npm start`)
