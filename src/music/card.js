@@ -40,15 +40,19 @@ const divider = () =>
 
 const text = (content) => new TextDisplayBuilder().setContent(content);
 
-/** İki satır buton: [⏮️ ⏸️ ⏭️ 🔁] ve [❤️ ✨ 🎛️ Kontrol paneli] */
+/**
+ * Tek satır buton: [⏮️] [⏸️] [⏭️] [❤️] [🎛️]
+ *
+ * Discord'da buton üzerine gelince çıkan bir "ipucu" (tooltip) yok; tek yol
+ * butonun üstündeki yazı. Burada sadece ikon var, açıklamalar `/help` içinde.
+ */
 export function buildControlRows(player) {
   const current = player?.queue?.current ?? null;
   const paused = Boolean(player?.paused);
-  const mode = player?.repeatMode ?? 'off';
   const hasPrevious = (player?.queue?.previous?.length ?? 0) > 0;
   const idle = !current;
 
-  const row1 = new ActionRowBuilder().addComponents(
+  const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`${MUSIC_BUTTON_PREFIX}previous`)
       .setEmoji('⏮️')
@@ -68,34 +72,19 @@ export function buildControlRows(player) {
       .setDisabled(idle),
 
     new ButtonBuilder()
-      .setCustomId(`${MUSIC_BUTTON_PREFIX}loop`)
-      .setEmoji('🔁')
-      .setStyle(mode === 'off' ? ButtonStyle.Secondary : ButtonStyle.Success)
-      .setDisabled(idle),
-  );
-
-  const row2 = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
       .setCustomId(`${MUSIC_BUTTON_PREFIX}like`)
       .setEmoji('❤️')
       .setStyle(ButtonStyle.Secondary)
       .setDisabled(idle),
 
     new ButtonBuilder()
-      .setCustomId(`${MUSIC_BUTTON_PREFIX}similar`)
-      .setEmoji('✨')
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(idle),
-
-    new ButtonBuilder()
       .setCustomId(`${MUSIC_BUTTON_PREFIX}panel`)
       .setEmoji('🎛️')
-      .setLabel('Kontrol paneli')
       .setStyle(ButtonStyle.Primary)
       .setDisabled(idle),
   );
 
-  return [row1, row2];
+  return [row];
 }
 
 /**
@@ -106,12 +95,9 @@ export function buildControlRows(player) {
  *   Sanatçı                   ┘
  *   ────────────────
  *   `3:43`  ▬▬🔘▬▬  `4:17`
+ *   [⏮️] [⏸️] [⏭️] [❤️] [🎛️]
  *   ────────────────
- *   Ekleyen: @kişi
- *   [⏮️] [⏸️] [⏭️] [🔁]
- *   [❤️] [✨] [🎛️ Kontrol paneli]
- *   ────────────────
- *   Sıradaki: ... | 📋 19 parça
+ *   Sıradaki: ... | 📋 19 parça | Ekleyen: @kişi
  */
 export function nowPlayingComponents(player, track) {
   const info = track?.info ?? {};
@@ -143,14 +129,13 @@ export function nowPlayingComponents(player, track) {
       ),
     )
     .addSeparatorComponents(divider())
-    .addTextDisplayComponents(text(`Ekleyen: ${requesterMention(track)}`))
     .addActionRowComponents(...buildControlRows(player))
     .addSeparatorComponents(divider())
     .addTextDisplayComponents(
       text(
         next
-          ? `-# Sıradaki: ${truncate(next.info?.title, 70)} | 📋 ${queueLength} parça`
-          : '-# Kuyrukta bekleyen parça yok.',
+          ? `-# Sıradaki: ${truncate(next.info?.title, 70)} | 📋 ${queueLength} parça | Ekleyen: ${requesterMention(track)}`
+          : `-# Kuyrukta bekleyen parça yok. | Ekleyen: ${requesterMention(track)}`,
       ),
     );
 
