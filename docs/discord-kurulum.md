@@ -11,12 +11,13 @@ Developer Portal'da iki ayrı yerde izin ayarı var ve bunlar **tamamen farklı 
 
 | | Nerede | Ne işe yarar | Bu bot ne ister |
 |---|---|---|---|
-| **A) Privileged Gateway Intents** | `Bot` sekmesi | Botun Discord'dan hangi **olay verilerini** alabileceği (kim üye oldu, kim mesaj yazdı…) | **HİÇBİRİ** — üçünü de kapalı bırak |
-| **B) Bot Permissions** | Davet linki üretirken | Botun sunucuda **ne yapmaya izinli** olduğu (mesaj gönder, sese katıl…) | 5 tanesi (aşağıda) |
+| **A) Privileged Gateway Intents** | `Bot` sekmesi | Botun Discord'dan hangi **olay verilerini** alabileceği (kim üye oldu, kim mesaj yazdı…) | Sadece **Server Members Intent** açık (oto-rol için); diğer ikisi kapalı |
+| **B) Bot Permissions** | Davet linki üretirken | Botun sunucuda **ne yapmaya izinli** olduğu (mesaj gönder, sese katıl…) | 7 tanesi (aşağıda) |
 
 `A`'yı yanlış anlamak en sık hatadır: bot "tepki vermiyor" sanılır, oysa intent'in
-konuyla ilgisi yoktur. Bu bot yalnızca `Guilds` ve `GuildVoiceStates` kullanır;
-**ikisi de privileged değil**, yani hiçbir toggle açman gerekmez.
+konuyla ilgisi yoktur. Bu bot `Guilds`, `GuildVoiceStates` ve `GuildMembers`
+kullanır. Yalnızca **Server Members Intent** privileged'dir ve oto-rol için
+**açık olmak zorundadır**; diğer ikisi kapalı kalmalı.
 
 ---
 
@@ -85,22 +86,25 @@ DISCORD_TOKEN=MTIzNDU2Nzg5MDEyMzQ1Njc4OQ.Gxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyy
 
 ---
 
-## 4. Privileged Gateway Intents — HİÇBİRİNİ AÇMA
+## 4. Privileged Gateway Intents — sadece Server Members
 
 Aynı **Bot** sekmesinde aşağı kaydır:
 
 ```
 ┌─ Privileged Gateway Intents ───────────────────────┐
 │  Presence Intent                [ ] KAPALI         │
-│  Server Members Intent          [ ] KAPALI         │
+│  Server Members Intent          [x] AÇIK           │ ← oto-rol için şart
 │  Message Content Intent         [ ] KAPALI         │
 └────────────────────────────────────────────────────┘
-                    ↑ üçü de böyle kalmalı
 ```
 
-**Bu bot slash komutlarıyla çalışır** — mesajları okumaya ihtiyacı yok. Bunları
-açman botun Discord tarafından ek doğrulamaya (100+ sunucuda) tabi tutulmasına
-yol açar. Açık bırakmanın hiçbir faydası yok.
+**Server Members Intent**, `guildMemberAdd` olayını (sunucuya yeni üye katıldı)
+alabilmek için gerekir; oto-rol özelliği buna dayanır. Kapalı kalırsa bot
+çalışır ama yeni üyelere rol vermez (konsolda hata da görmezsin, olay hiç gelmez).
+
+Diğer ikisi kapalı kalmalı: bot mesaj **içeriğini** okumaz, çevrimiçi durum
+takibi de yapmaz. Bunları açmanın hiçbir faydası yok, sadece 100+ sunucuda ek
+doğrulama yükü getirir.
 
 ---
 
@@ -115,7 +119,7 @@ verirsin.
 2. **SCOPES** kutusunda şunları işaretle:
    - ✅ `bot`
    - ✅ `applications.commands`  ← **bunu unutma, yoksa slash komutlar hiç görünmez**
-3. **BOT PERMISSIONS** kutusunda aşağıdaki 5 tanesini işaretle
+3. **BOT PERMISSIONS** kutusunda aşağıdaki 7 tanesini işaretle
 4. En altta oluşan URL'yi **Copy** et
 
 ### 5b. UI ile (yeni yol)
@@ -130,12 +134,12 @@ Portal'ın yeni sürümünde **Installation** sekmesi var:
 Aşağıdaki URL'de sadece `CLIENT_ID` yerine kendi ID'ni yaz ve tarayıcıda aç:
 
 ```
-https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot+applications.commands&permissions=3165184
+https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot+applications.commands&permissions=271666176
 ```
 
 Örnek (ID `1234567890123456789` için):
 ```
-https://discord.com/oauth2/authorize?client_id=1234567890123456789&scope=bot+applications.commands&permissions=3165184
+https://discord.com/oauth2/authorize?client_id=1234567890123456789&scope=bot+applications.commands&permissions=271666176
 ```
 
 Açılan sayfada **sunucuyu seç** → **Yetkilendir**.
@@ -149,13 +153,20 @@ Açılan sayfada **sunucuyu seç** → **Yetkilendir**.
 | Kanalları Gör | View Channels | `1024` | Ses/metin kanalını görebilmek |
 | Mesaj Gönder | Send Messages | `2048` | Komut yanıtları |
 | Bağlantı Yerleştir | Embed Links | `16384` | Şarkı kartları (embed) |
+| Mesaj Geçmişini Gör | Read Message History | `65536` | Eski bot mesajlarını temizleyebilmek |
 | Bağlan | Connect | `1048576` | Ses kanalına girmek |
 | Konuş | Speak | `2097152` | Ses yayını yapmak |
-| | | **toplam `3165184`** | |
+| Rolleri Yönet | Manage Roles | `268435456` | Yeni üyelere `HUMAN` rolü vermek |
+| | | **toplam `271666176`** | |
 
-**Administrator vermeye gerek yok, verme.** Bu bot 5 izinle tam çalışır.
+**Administrator vermeye gerek yok, verme.** Bu bot 7 izinle tam çalışır.
 (Farklı bir izin seti istersen değerler toplanır; yukarıdaki `permissions=`
 parametresini değiştirmen yeterli.)
+
+> **Önemli:** Oto-rolün çalışması için botun rolü, verdiği rolün (`HUMAN`)
+> **üstünde** olmalı. Sunucu Ayarları → Roller → botun rolünü `HUMAN` rolünün
+> üstüne sürükle. Ayrıca `/prune` için ayrıca **Mesajları Yönet** izni gerekir
+> (kanal izinlerinden verilebilir; davet linkine eklemek zorunlu değil).
 
 `applications.commands` bir bot izni değil, bir **OAuth2 scope**'udur — bu yüzden
 5. adımda scopes kutusunda işaretlenir. Yoksa komutlar sunucuda hiç görünmez.
@@ -214,8 +225,9 @@ npm run doctor
 | `Bot ` önekini kopyalamak | `invalid token` | Sadece token'ın kendisi |
 | Token'ı resetleyip `.env`'i güncellememek | Bir anda `invalid token` | Yeni token'ı `.env`'e yaz, paneli yeniden başlat |
 | `DEV_GUILD_ID` boş bırakmak | Komutlar 1 saat görünmüyor | Sunucu ID'sini yaz |
-| Administrator vermek | Güvenlik riski | Gerek yok, 5 izin yeterli |
-| Privileged intent'leri açmak | Gereksiz doğrulama yükü | Üçünü de kapalı tut |
+| Administrator vermek | Güvenlik riski | Gerek yok, 7 izin yeterli |
+| Server Members Intent'i kapalı bırakmak | Yeni üyelere rol verilmiyor, konsolda hata yok | Portal → Bot → **Server Members Intent**'i aç, paneli yeniden başlat |
+| Intent açık ama oto-rol vermiyor | Konsolda "rolümden yukarıda" uyarısı | Sunucu Ayarları → Roller → botun rolünü `HUMAN` rolünün üstüne taşı |
 
 ---
 
@@ -227,4 +239,4 @@ npm run doctor
 | İzinler (permissions) değişti | Davet URL'sini yeniden aç, sunucuya tekrar yetkilendir |
 | Yeni slash komut eklendi | Botu yeniden başlat (kendisi kaydeder) |
 | Sadece isim/avatar değişti | Hiçbir şey |
-| Privileged intent'ler değişti | Hiçbir şey (bu bot kullanmıyor) |
+| Privileged intent'ler değişti | Server Members Intent açık kalmalı (oto-rol) |

@@ -130,6 +130,13 @@ console.log('\nYapılandırma');
 console.log(`  Lavalink     : ${config.lavalink.host}:${config.lavalink.port} (secure=${config.lavalink.secure})`);
 console.log(`  Arama kaynağı: ${searchPlatform}`);
 console.log(`  Autoplay     : ${config.autoplay ? 'açık' : 'kapalı'}`);
+console.log(
+  `  Oto-rol      : ${
+    config.autoRole.enabled
+      ? `${config.autoRole.name}${config.autoRole.id ? ` (id=${config.autoRole.id})` : ''}`
+      : 'kapalı'
+  }`,
+);
 console.log(`  Öneri motoru : ${config.lastfmKey ? 'Last.fm + YouTube mix' : 'yalnızca YouTube mix'}`);
 console.log(`  Playlist sın.: ${config.maxPlaylistSize} parça`);
 console.log(`\nKomutlar (${names.size})`);

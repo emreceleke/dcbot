@@ -62,7 +62,8 @@ export function buildControlRows(player) {
     new ButtonBuilder()
       .setCustomId(`${MUSIC_BUTTON_PREFIX}pause`)
       .setEmoji(paused ? '▶️' : '⏸️')
-      .setStyle(paused ? ButtonStyle.Success : ButtonStyle.Secondary)
+      // Yeşil (Success) arka plan yok: duraklat/devam aynı gri butonda.
+      .setStyle(ButtonStyle.Secondary)
       .setDisabled(idle),
 
     new ButtonBuilder()

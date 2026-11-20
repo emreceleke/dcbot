@@ -114,6 +114,15 @@ export const config = {
   maxPlaylistSize: int('MAX_PLAYLIST_SIZE', 100),
   autoplay: bool('AUTOPLAY', true),
   lastfmKey: readString('LASTFM_API_KEY'),
+
+  // Sunucuya yeni katılanlara verilecek rol. ID verilirse önce o denenir,
+  // yoksa isim eşleşmesi kullanılır.
+  autoRole: {
+    enabled: bool('AUTO_ROLE', true),
+    id: readString('AUTO_ROLE_ID'),
+    name: readString('AUTO_ROLE_NAME') || 'HUMAN',
+  },
+
   logLevel: readString('LOG_LEVEL') || 'info',
 };
 
@@ -149,6 +158,9 @@ export function envSummary() {
     lavalink: `${config.lavalink.host}:${config.lavalink.port} (secure=${config.lavalink.secure})`,
     searchPlatform: config.searchPlatform,
     autoplay: config.autoplay,
+    autoRole: config.autoRole.enabled
+      ? `${config.autoRole.name}${config.autoRole.id ? ` (id=${config.autoRole.id})` : ''}`
+      : 'kapalı',
     lastfm: config.lastfmKey ? 'var' : 'yok (YouTube mix kullanılacak)',
     cwd: process.cwd(),
   };

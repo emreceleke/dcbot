@@ -17,6 +17,14 @@ export function forgetNowPlaying(guildId) {
   nowPlayingMessages.delete(guildId);
 }
 
+/** Kayıtlı kart referanslarının listesi (temizlik taraması kullanır). */
+export function listNowPlaying() {
+  return [...nowPlayingMessages.entries()].map(([guildId, reference]) => ({
+    guildId,
+    ...reference,
+  }));
+}
+
 async function fetchMessage(client, reference) {
   const channel = await client.channels.fetch(reference.channelId).catch(() => null);
   if (!channel?.isTextBased()) return null;

@@ -78,6 +78,8 @@ LAVALINK_NAME=jirayu
 
 SEARCH_PLATFORM=ytmsearch
 AUTOPLAY=true
+AUTO_ROLE=true
+AUTO_ROLE_NAME=HUMAN
 LOG_LEVEL=info
 ```
 
@@ -161,7 +163,7 @@ Başarılı çıktı:
 | `Cannot find module 'discord.js'` | `npm install` yapılmadı | `npm install --omit=dev` |
 | `Zorunlu ortam değişkeni eksik: DISCORD_TOKEN` | `.env` yok veya boş | Adım 3'ü yap |
 | `DISCORD GİRİŞİ BAŞARISIZ` + `invalid token` | Token yanlış/kopyalama hatası | Portal → Reset Token. Baştaki/sondaki boşluk ve `Bot ` öneki olmasın |
-| `disallowed intents` | Portal'da intent ayarı | Portal → Bot → Privileged Gateway Intents. **Bu bot hiçbirini istemez**, hepsini kapatabilirsin |
+| `disallowed intents` | Portal'da intent ayarı | Portal → Bot → Privileged Gateway Intents → **Server Members Intent**'i aç (oto-rol için gerekli). Diğer ikisi kapalı kalsın |
 | Süreç anında ölüyor, çıktı yok, **exit code 137** | **RAM yetersiz (OOM)** | 128 MB yetmez. En az 256 MB, ideal 512 MB istediğin plana geç |
 | `npm install` çok yavaş / timeout | Panel kaynak limiti | `--omit=dev` kullan, gereksiz paketleri kurma |
 | Bot çevrimiçi, ama Discord'da komut yok | Global kayıt gecikmesi | `DEV_GUILD_ID` doldur → anında görünür |

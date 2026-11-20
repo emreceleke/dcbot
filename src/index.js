@@ -53,6 +53,7 @@ async function main() {
   console.log(`  Lavalink      : ${summary.lavalink}`);
   console.log(`  Arama kaynağı : ${summary.searchPlatform}`);
   console.log(`  Last.fm       : ${summary.lastfm}`);
+  console.log(`  Oto-rol       : ${summary.autoRole}`);
   console.log(line());
 
   const { createLavalink } = await import('./music/lavalink.js');
@@ -63,6 +64,8 @@ async function main() {
   const { handleLikedSelect, LIKED_SELECT_ID } = await import('./music/likedView.js');
   const { recordPlay } = await import('./music/history.js');
   const { attachAutoLeave, cancelAutoLeave, refreshAutoLeave } = await import('./music/autoLeave.js');
+  const { attachAutoRole } = await import('./autoRole.js');
+  const { startMessageCleanup } = await import('./cleanup.js');
   const { isMusicButton } = await import('./music/card.js');
   const {
     finishNowPlaying,
@@ -72,8 +75,13 @@ async function main() {
   } = await import('./music/nowPlaying.js');
 
   const client = new Client({
-    // İkisi de "privileged" değil — Developer Portal'da ekstra izin gerekmez.
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+    // GuildVoiceStates ses için; GuildMembers (privileged) yeni üye olayı
+    // için gerekli — Developer Portal'da "Server Members Intent" açık olmalı.
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildVoiceStates,
+      GatewayIntentBits.GuildMembers,
+    ],
   });
 
   client.commands = new Collection();
@@ -133,6 +141,9 @@ async function main() {
   // Kanal boş kalırsa 10 dk sonra ayrıl.
   attachAutoLeave(client);
 
+  // Yeni üyelere oto-rol.
+  attachAutoRole(client);
+
   // ─── Etkileşimler ─────────────────────────────────────────────────────────
   client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) {
@@ -189,6 +200,8 @@ async function main() {
     await registerCommands(client, config);
     // İlerleme çubuğunu canlı tut.
     startNowPlayingUpdater(client);
+    // 12 saatten eski bot mesajlarını periyodik temizle.
+    startMessageCleanup(client);
     client.user.setPresence({
       activities: [{ name: 'YouTube • /play', type: 2 }],
       status: 'online',
