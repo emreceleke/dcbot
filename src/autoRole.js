@@ -1,5 +1,6 @@
 import { PermissionsBitField } from 'discord.js';
 import { config, log } from './config.js';
+import { effectiveAutoRole } from './settings.js';
 
 /**
  * Oto-rol: sunucuya yeni katılan insanlara otomatik rol verir.
@@ -8,32 +9,35 @@ import { config, log } from './config.js';
  * `HUMAN`); `AUTO_ROLE_ID` verilirse önce ID denenir. Böylece rollerin
  * sunucudan sunucuya farklı ID'lerde olması sorun olmaz.
  *
+ * Sunucu bazlı ayarlar (`/settings otorol ...`) `.env` değerlerini geçersiz
+ * kılar; `effectiveAutoRole` ikisini birleştirir.
+ *
  * `guildMemberAdd` olayı için **Server Members Intent** (privileged) gerekir.
  * Açık değilse Discord bu olayı hiç göndermez; bot çalışır ama rol atamaz.
  */
 const normalize = (name) => String(name ?? '').trim().toLocaleLowerCase('tr');
 
-function findRole(guild) {
-  const { id, name } = config.autoRole;
-
-  if (id) {
-    const byId = guild.roles.cache.get(id);
+function findRole(guild, { roleId, roleName }) {
+  if (roleId) {
+    const byId = guild.roles.cache.get(roleId);
     if (byId) return byId;
   }
 
-  const wanted = normalize(name);
+  const wanted = normalize(roleName);
   return guild.roles.cache.find((role) => normalize(role.name) === wanted) ?? null;
 }
 
 /** Tek bir üyeye oto-rolü atar. Test edilebilmesi için member dışarıdan gelir. */
 export async function assignAutoRole(member) {
-  if (!config.autoRole.enabled) return false;
   if (!member?.guild || member.user?.bot) return false;
 
   const guild = member.guild;
-  const role = findRole(guild);
+  const settings = effectiveAutoRole(guild.id);
+  if (!settings.enabled) return false;
+
+  const role = findRole(guild, settings);
   if (!role) {
-    log.warn(`Oto-rol: "${config.autoRole.name}" rolü ${guild.name} sunucusunda yok.`);
+    log.warn(`Oto-rol: "${settings.roleName}" rolü ${guild.name} sunucusunda yok.`);
     return false;
   }
 
@@ -66,16 +70,17 @@ export async function assignAutoRole(member) {
 
 /** Üye katılma olayını bağlar. */
 export function attachAutoRole(client) {
-  if (!config.autoRole.enabled) {
-    log.info('Oto-rol kapalı (AUTO_ROLE=false).');
-    return;
-  }
-
+  // Sunucu bazlı ayar `.env`'i ezebildiği için dinleyici her zaman bağlanır;
+  // kapalı sunucularda `assignAutoRole` hemen döner.
   client.on('guildMemberAdd', (member) => {
     assignAutoRole(member).catch((error) => {
       log.warn(`Oto-rol atanamadı (${member.guild?.name}):`, error?.message ?? error);
     });
   });
 
-  log.info(`Oto-rol açık: yeni üyelere "${config.autoRole.name}" rolü verilecek.`);
+  log.info(
+    config.autoRole.enabled
+      ? `Oto-rol açık: yeni üyelere varsayılan olarak "${config.autoRole.name}" rolü verilecek.`
+      : 'Oto-rol varsayılan olarak kapalı; sunucu bazlı `/settings otorol` ile açılabilir.',
+  );
 }

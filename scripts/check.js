@@ -137,6 +137,7 @@ console.log(
       : 'kapalı'
   }`,
 );
+console.log(`  Yetkili rol  : ${config.adminRoleName} (/settings)`);
 console.log(`  Öneri motoru : ${config.lastfmKey ? 'Last.fm + YouTube mix' : 'yalnızca YouTube mix'}`);
 console.log(`  Playlist sın.: ${config.maxPlaylistSize} parça`);
 console.log(`\nKomutlar (${names.size})`);

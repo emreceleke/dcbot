@@ -1,13 +1,17 @@
-import { config } from '../config.js';
+import { getSettings, updateSettings } from '../settings.js';
 
-// Sunucu bazlı ayarlar. Kalıcı hale getirmek istersen burayı SQLite/JSON'a taşı.
-const autoplayByGuild = new Map();
-
+/**
+ * Autoplay durumu.
+ *
+ * Eski sürümde yalnızca bellekte tutuluyordu (restart'ta sıfırlanıyordu).
+ * Artık kalıcı ayar deposuna (`data/settings.json`) bağlı; `/settings` ile de
+ * değiştirilebilir. Buton/panel senkron çizdiği için okuma senkron kaldı.
+ */
 export function isAutoplayEnabled(guildId) {
-  return autoplayByGuild.get(guildId) ?? config.autoplay;
+  return getSettings(guildId).autoplay;
 }
 
 export function setAutoplay(guildId, enabled) {
-  autoplayByGuild.set(guildId, Boolean(enabled));
+  updateSettings(guildId, { autoplay: Boolean(enabled) });
   return Boolean(enabled);
 }

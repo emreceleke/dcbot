@@ -40,6 +40,10 @@ function shutdown(code = 0) {
 async function main() {
   // Dinamik import: yapılandırma eksikse hatayı düzgün yakalayabilelim.
   const { config, log, envSummary } = await import('./config.js');
+  const { initSettings } = await import('./settings.js');
+
+  // Sunucu ayarları (data/settings.json) hazır olmadan hiçbir olay bağlanmamalı.
+  const savedGuilds = await initSettings();
 
   const summary = envSummary();
   console.log(line());
@@ -54,6 +58,8 @@ async function main() {
   console.log(`  Arama kaynağı : ${summary.searchPlatform}`);
   console.log(`  Last.fm       : ${summary.lastfm}`);
   console.log(`  Oto-rol       : ${summary.autoRole}`);
+  console.log(`  Yetkili rol   : ${summary.adminRole}`);
+  console.log(`  Kayıtlı ayar  : ${savedGuilds} sunucu (data/settings.json)`);
   console.log(line());
 
   const { createLavalink } = await import('./music/lavalink.js');

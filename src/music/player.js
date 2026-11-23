@@ -1,4 +1,5 @@
-import { config, log } from '../config.js';
+import { log } from '../config.js';
+import { getSettings } from '../settings.js';
 
 // Sunucu bazlı "en son çalan parça" hafızası. Autoplay ve /similar için gerekli;
 // player objesine veri iliştirmek yerine burada tutmak yeniden başlatmaya daha dayanıklı.
@@ -48,7 +49,7 @@ export async function getOrCreatePlayer(client, interaction) {
       textChannelId: interaction.channel.id,
       selfDeaf: true,
       selfMute: false,
-      volume: config.defaultVolume,
+      volume: getSettings(interaction.guild.id).volume,
     });
   } else {
     // Metin kanalı değişmiş olabilir; duyuruları yeni kanala gönder.

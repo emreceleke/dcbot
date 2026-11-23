@@ -1,4 +1,5 @@
 import { log } from '../config.js';
+import { getAutoLeaveDelay } from '../settings.js';
 import { finishNowPlaying } from './nowPlaying.js';
 import { forgetGuild } from './player.js';
 
@@ -41,9 +42,16 @@ function clearTimer(guildId) {
  * Kanalın doluluk durumuna göre sayacı başlatır/iptal eder.
  * Dışarıdan da çağrılabilir (ör. parça başlarken ilk kontrol).
  */
-export function refreshAutoLeave(client, player, { delay = AUTO_LEAVE_DELAY } = {}) {
+export function refreshAutoLeave(client, player, { delay } = {}) {
   const guildId = player?.guildId;
   if (!guildId || !player?.voiceChannelId) return;
+
+  // Süre sunucu bazlı ayardan gelir (`/settings ayrilma`); 0 = özellik kapalı.
+  const wait = Number.isFinite(delay) ? delay : getAutoLeaveDelay(guildId);
+  if (!wait) {
+    clearTimer(guildId);
+    return;
+  }
 
   const channel = resolveChannel(client, player);
   const listeners = listenerCount(channel);
@@ -58,7 +66,7 @@ export function refreshAutoLeave(client, player, { delay = AUTO_LEAVE_DELAY } = 
   if (timers.has(guildId)) return;
 
   log.info(
-    `Ses kanalı boş (${guildId}); ${delay >= 60000 ? `${Math.round(delay / 60000)} dk` : `${Math.round(delay / 1000)} sn`} sonra ayrılacağım.`,
+    `Ses kanalı boş (${guildId}); ${wait >= 60000 ? `${Math.round(wait / 60000)} dk` : `${Math.round(wait / 1000)} sn`} sonra ayrılacağım.`,
   );
 
   const timer = setTimeout(async () => {
@@ -83,14 +91,14 @@ export function refreshAutoLeave(client, player, { delay = AUTO_LEAVE_DELAY } = 
     } catch (error) {
       log.warn('Otomatik ayrılma başarısız:', error?.message ?? error);
     }
-  }, delay);
+  }, wait);
 
   timer.unref?.();
   timers.set(guildId, timer);
 }
 
 /** Ses durumu değiştikçe sayaçları güncelleyen dinleyiciyi bağlar. */
-export function attachAutoLeave(client, { delay = AUTO_LEAVE_DELAY } = {}) {
+export function attachAutoLeave(client, { delay } = {}) {
   client.on('voiceStateUpdate', (oldState, newState) => {
     const guildId = newState.guild?.id ?? oldState.guild?.id;
     const player = client.lavalink?.getPlayer(guildId);

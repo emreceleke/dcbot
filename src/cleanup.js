@@ -1,5 +1,6 @@
 import { PermissionsBitField } from 'discord.js';
 import { log } from './config.js';
+import { getCleanupAge } from './settings.js';
 import { listNowPlaying } from './music/nowPlaying.js';
 
 /**
@@ -81,14 +82,14 @@ async function cleanChannel(channel, botId, cutoff, keep, stats) {
 
 /**
  * Tüm sunucularda bir tur temizlik yapar.
+ * Süre sunucu bazlı (`/settings temizlik`); 0 = o sunucuda kapalı.
  * Aynı anda iki tarama çalışmaz; süren varsa `null` döner.
  */
-export async function sweepMessages(client, { age = MESSAGE_MAX_AGE } = {}) {
+export async function sweepMessages(client, { age } = {}) {
   if (!client?.user || running) return null;
   running = true;
 
   const startedAt = Date.now();
-  const cutoff = startedAt - age;
   const keep = protectedMessageIds(client);
   const stats = { deleted: 0, kept: 0, failed: 0, channels: 0, guilds: 0 };
 
@@ -96,6 +97,12 @@ export async function sweepMessages(client, { age = MESSAGE_MAX_AGE } = {}) {
     for (const guild of client.guilds.cache.values()) {
       const me = guild.members.me;
       if (!me) continue;
+
+      // Testlerde `age` verilebilir; normalde sunucunun kendi ayarı geçerli.
+      const maxAge = Number.isFinite(age) ? age : getCleanupAge(guild.id);
+      if (!maxAge) continue;
+
+      const cutoff = startedAt - maxAge;
       stats.guilds += 1;
 
       for (const channel of guild.channels.cache.values()) {

@@ -123,6 +123,10 @@ export const config = {
     name: readString('AUTO_ROLE_NAME') || 'HUMAN',
   },
 
+  // `/settings` komutunu kullanabilecek rol (ada göre). Yönetici izni ve
+  // sunucu sahibi her durumda yetkili sayılır.
+  adminRoleName: readString('ADMIN_ROLE_NAME') || 'ADMIN',
+
   logLevel: readString('LOG_LEVEL') || 'info',
 };
 
@@ -161,6 +165,7 @@ export function envSummary() {
     autoRole: config.autoRole.enabled
       ? `${config.autoRole.name}${config.autoRole.id ? ` (id=${config.autoRole.id})` : ''}`
       : 'kapalı',
+    adminRole: config.adminRoleName,
     lastfm: config.lastfmKey ? 'var' : 'yok (YouTube mix kullanılacak)',
     cwd: process.cwd(),
   };
