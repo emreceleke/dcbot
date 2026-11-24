@@ -4,6 +4,7 @@ import { COLORS, errorEmbed, historyEmbed, queueEmbed, truncate } from './embeds
 import { nowPlayingPayload, textCard } from './card.js';
 import { buildPanelPayload, loopLabel, nextLoopMode } from './panel.js';
 import { likedPayload } from './likedView.js';
+import { addFillerTracks } from './queueAdd.js';
 import { getHistory } from './history.js';
 import { refreshPauseState } from './nowPlaying.js';
 import { canControl } from './player.js';
@@ -145,7 +146,7 @@ async function handleSimilar(interaction, player, current) {
     });
   }
 
-  await player.queue.add(tracks);
+  await addFillerTracks(player, tracks);
   if (!player.playing && !player.paused) await player.play();
 
   // Kartın footer'ı ve kuyruk sayısı hemen yansısın.

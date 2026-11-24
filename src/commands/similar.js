@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { COLORS, errorEmbed, truncate } from '../music/embeds.js';
 import { getRememberedTrack } from '../music/player.js';
+import { addFillerTracks } from '../music/queueAdd.js';
 import { findRecommendations } from '../recommend/engine.js';
 
 export default {
@@ -43,7 +44,7 @@ export default {
       });
     }
 
-    await player.queue.add(tracks);
+    await addFillerTracks(player, tracks);
     if (!player.playing && !player.paused) await player.play();
 
     const list = tracks

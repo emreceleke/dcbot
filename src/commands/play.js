@@ -3,7 +3,8 @@ import { config, log } from '../config.js';
 import { buildIdentifier, describeResult, isSpotify } from '../music/resolve.js';
 import { getOrCreatePlayer } from '../music/player.js';
 import { COLORS, truncate } from '../music/embeds.js';
-import { buildControlRows, nowPlayingPayload, textCard } from '../music/card.js';
+import { nowPlayingPayload, textCard } from '../music/card.js';
+import { addFillerTracks, addManualTracks } from '../music/queueAdd.js';
 import { rememberNowPlaying } from '../music/nowPlaying.js';
 
 export default {
@@ -67,9 +68,17 @@ export default {
     const info = describeResult(result);
     const wasIdle = !player.playing && !player.paused;
 
-    for (const track of tracks) await player.queue.add(track);
+    // Arama sonucunda ilk parça istenen şarkı, kalanı "benzer sonuç" dolgusu.
+    // Playlist/link ise kullanıcının seçtiği bütün parçalar elle eklenmiş sayılır.
+    const requested = info.kind === 'search' ? tracks.slice(0, 1) : tracks;
+    const filler = info.kind === 'search' ? tracks.slice(1) : [];
+
+    await addManualTracks(player, requested);
 
     if (wasIdle) await player.play();
+
+    // Dolgu, elle eklenenlerin arkasına girer; sıradaki şarkı hep senin seçtiğin olur.
+    await addFillerTracks(player, filler);
 
     // Çalmaya bu istekle başladıysa tam kartı gönder ve onu "canlı" olarak kaydet.
     if (wasIdle) {
@@ -78,15 +87,17 @@ export default {
       return;
     }
 
-    // Zaten bir şey çalıyordu: kısa özet + butonlar.
+    // Zaten bir şey çalıyordu: kısa özet (buton yok, kart zaten yukarıda).
     const summary =
-      tracks.length === 1
-        ? `➕  **${truncate(tracks[0].info?.title, 80)}** kuyruğa eklendi.`
+      requested.length === 1
+        ? `➕  **${truncate(requested[0].info?.title, 80)}** kuyruğa eklendi.`
         : info.kind === 'playlist' && info.name
-          ? `➕  **${truncate(info.name, 80)}** (${tracks.length} parça) kuyruğa eklendi.`
-          : `➕  **${tracks.length} parça** kuyruğa eklendi.`;
+          ? `➕  **${truncate(info.name, 80)}** (${requested.length} parça) kuyruğa eklendi.`
+          : `➕  **${requested.length} parça** kuyruğa eklendi.`;
 
-    await interaction.editReply(textCard(summary, { rows: buildControlRows(player) }));
+    const detail = filler.length ? `\n-# +${filler.length} benzer sonuç sıranın sonuna eklendi.` : '';
+
+    await interaction.editReply(textCard(summary + detail));
     return;
   },
 };

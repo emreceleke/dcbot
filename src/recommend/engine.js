@@ -1,4 +1,5 @@
 import { config, log } from '../config.js';
+import { addFillerTracks } from '../music/queueAdd.js';
 import {
   buildRadioMixUrl,
   getSimilarTracks,
@@ -116,7 +117,7 @@ export async function continueWithRecommendations(player, seedTrack, { limit = 5
     const { source, tracks } = await findRecommendations(player, seedTrack, { limit });
     if (!tracks.length) return false;
 
-    await player.queue.add(tracks);
+    await addFillerTracks(player, tracks);
     if (!player.playing && !player.paused) await player.play();
 
     log.info(`Autoplay (${source}): ${guildId} sunucusuna ${tracks.length} parça eklendi.`);
